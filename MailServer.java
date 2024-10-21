@@ -9,87 +9,71 @@ import java.util.Scanner;
             String returnAddress = "";
             String destinationAddress = "";
             String emailBody = "";
-            boolean secondCommand = false;
-            boolean thirdCommand = false;
 
-            // first command MAIL FROM
+            int state = 0;
 
             while(true){
-
                 String text = input.nextLine();
-
-                if (Objects.equals(text, "QUIT")){
+                if (text.equals("QUIT")){
                     System.out.println("Bye");
                     break;
-                } else if (text.startsWith("MAIL FROM: ")){
-
-                    if(isEmailValid(text)){
-                        returnAddress = text.substring(text.indexOf(":")+2);
-                        System.out.println("OK");
-                        secondCommand = true;
-                        break;
                     }
-                    else {
-                        System.out.println("Invalid email address");
-                    }
-                } else {
-                    System.out.println("Invalid command");
-                }
-            }
 
-            // second command - checking for RCPT
+                switch(state) {
+                    case 0:
+                         if (text.startsWith("MAIL FROM: ")){
+                            if(isEmailValid(text)){
+                                returnAddress = text.substring(text.indexOf(":")+2);
+                                System.out.println("OK");
+                                state = 1;
 
-            while (secondCommand){
-
-                String text = input.nextLine();
-
-                if (Objects.equals(text, "QUIT")){
-                    System.out.println("Bye");
-                    break;
-                } else if (text.startsWith("RCPT TO: ")){
-                    if(isEmailValid(text)){
-                        destinationAddress = text.substring(text.indexOf(":")+2);
-                        System.out.println("OK");
-                        thirdCommand = true;
-                        break;
-                    }
-                    else {
-                        System.out.println("Invalid email address");
-                    }
-                } else {
-                    System.out.println("Invalid command");
-                }
-            }
-
-            // third command
-
-            while (thirdCommand){
-
-                String text = input.nextLine();
-                if (Objects.equals(text, "QUIT")){
-                    System.out.println("Bye");
-                    break;
-                } else if (Objects.equals(text, "DATA")) {
-                    boolean writingEmail = true;
-                    while (writingEmail) {
-                        String email = input.nextLine();
-                        if (Objects.equals(email, "QUIT")) {
-                            break;
-                        } else if (Objects.equals(email, ".")) {
-                            System.out.println("Sending email...");
-                            System.out.println("from: " + returnAddress);
-                            System.out.println("to: " + destinationAddress);
-                            System.out.println(emailBody);
-                            System.out.println("...done!");
-                            break;
+                            }
+                            else {
+                                System.out.println("Invalid email address");
+                            }
                         } else {
-                            emailBody = emailBody + "\n" + email;
+                            System.out.println("Invalid command");
                         }
-                    }
-                }
-            }
-        }
+                    break;
 
+                    case 1:
+                        if (text.startsWith("RCPT TO: ")){
+                            if(isEmailValid(text)){
+                                destinationAddress = text.substring(text.indexOf(":")+2);
+                                System.out.println("OK");
+                                state = 2;
+                            }
+                            else {
+                                System.out.println("Invalid email address");
+                            }
+                        } else {
+                            System.out.println("Invalid command");
+                        }
+                    break;
+
+                    case 2:
+                        if (text.equals("DATA")) {
+                            while (true){
+                                String email = input.nextLine();
+                                if (email.equals(".")) {
+                                    System.out.println("Sending email...");
+                                    System.out.println("from: " + returnAddress);
+                                    System.out.println("to: " + destinationAddress);
+                                    System.out.println(emailBody);
+                                    System.out.println("...done!");
+                                    state = 0;
+                                    break;
+                                } else {
+                                    emailBody = emailBody + "\n" + email;
+                                }
+                            }
+                        }
+                    break;
+                }
+
+            }
+
+        }
 
         public static boolean isEmailValid(String text){
 
